@@ -25,15 +25,13 @@ fn main() {
         Window::new("Welcome to the ImPlot-rs demo!")
             .size([430.0, 450.0], Condition::FirstUseEver)
             .build(ui, || {
+            .position([10.0, 10.0], Condition::FirstUseEver)
                 ui.checkbox("Show C++ ImPlot demo window", &mut showing_demo);
                 ui.checkbox("Show Rust ImPlot demo windows", &mut showing_rust_demo);
-                // TODO(4bb4) ... move windows by default so this is less confusing
                 ui.text_wrapped(
-                    "Note that the windows are stacked, so move this one out of the way to see\
-                     the ones beneath it. If you see something in the C++ demo window, but not\
-                     in the Rust ImPlot demo window, that means the bindings are likely not   \
-                     implemented yet. Feel free to open an issue if you are missing something \
-                     in particular.
+                     "If you see something in the C++ demo window, but not in the Rust ImPlot \
+                     demo window, that means the bindings are likely not implemented yet. \
+                     Feel free to open an issue if you are missing something in particular.
                     ",
                 );
             });
