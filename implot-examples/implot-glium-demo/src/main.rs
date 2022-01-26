@@ -1,5 +1,4 @@
 use imgui::{Condition, Window};
-use implot::Context;
 
 // The actual backend-specific code is in this.
 mod support;
@@ -9,7 +8,7 @@ fn main() {
     let mut showing_demo = false;
     let mut showing_rust_demo = true;
     let mut demo_state = examples_shared::DemoState::new();
-    let plotcontext = Context::create();
+    let plotcontext = implot::Context::create();
     system.main_loop(move |_, ui| {
         // The context is moved into the closure after creation so plot_ui is valid.
         let plot_ui = plotcontext.get_plot_ui();
