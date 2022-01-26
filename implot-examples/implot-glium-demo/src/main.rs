@@ -22,10 +22,10 @@ fn main() {
             demo_state.show_demos(ui, &plot_ui);
         }
 
-        Window::new("Welcome to the ImPlot-rs demo!")
+        ui.window("Welcome to the ImPlot-rs demo!")
             .size([430.0, 450.0], Condition::FirstUseEver)
-            .build(ui, || {
             .position([10.0, 10.0], Condition::FirstUseEver)
+            .build(|| {
                 ui.checkbox("Show C++ ImPlot demo window", &mut showing_demo);
                 ui.checkbox("Show Rust ImPlot demo windows", &mut showing_rust_demo);
                 ui.text_wrapped(
