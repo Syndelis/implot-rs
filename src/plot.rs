@@ -636,14 +636,27 @@ impl Plot {
     /// Creates a window and runs a closure to construct the contents. This internally
     /// calls `begin` and `end`.
     ///
-    /// Note: the closure is not called if ImPlot::BeginPlot() returned
-    /// false - TODO(4bb4) figure out if this is if things are not rendered
+    /// Note: the closure is only called if the plot is visible.
+    ///
+    /// This function returns the return value from the closure,
+    /// wrapped in an `Option`. The Option is `None` if the plot was
+    /// not rendered. Can be used to pass data out of the closure (e.g
+    /// for error handling)
     #[rustversion::attr(since(1.48), doc(alias = "BeginPlot"))]
     #[rustversion::attr(since(1.48), doc(alias = "EndPlot"))]
-    pub fn build<F: FnOnce()>(self, plot_ui: &PlotUi, f: F) {
+    pub fn build<T, F: FnOnce() -> T>(self, plot_ui: &PlotUi, f: F) -> Option<T> {
         if let Some(token) = self.begin(plot_ui) {
-            f();
-            token.end()
+            // Execute closure
+            let result = f();
+
+            // End plot
+            token.end();
+
+            // Plot was rendered, return whatever the closure did
+            Some(result)
+        } else {
+            // Plot not visible, return None
+            None
         }
     }
 }
