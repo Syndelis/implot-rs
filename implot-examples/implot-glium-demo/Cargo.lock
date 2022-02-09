@@ -627,7 +627,7 @@ dependencies = [
 [[package]]
 name = "imgui"
 version = "0.8.1-alpha.0"
-source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=2db100bf8f2e837cd471636de18d379caafe29a5#2db100bf8f2e837cd471636de18d379caafe29a5"
+source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=d05827258fac63f0a57693bb51275c9bb483aef4#d05827258fac63f0a57693bb51275c9bb483aef4"
 dependencies = [
  "bitflags",
  "cfg-if 1.0.0",
@@ -639,7 +639,7 @@ dependencies = [
 [[package]]
 name = "imgui-glium-renderer"
 version = "0.8.1-alpha.0"
-source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=2db100bf8f2e837cd471636de18d379caafe29a5#2db100bf8f2e837cd471636de18d379caafe29a5"
+source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=d05827258fac63f0a57693bb51275c9bb483aef4#d05827258fac63f0a57693bb51275c9bb483aef4"
 dependencies = [
  "glium",
  "imgui",
@@ -648,7 +648,7 @@ dependencies = [
 [[package]]
 name = "imgui-sys"
 version = "0.8.1-alpha.0"
-source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=2db100bf8f2e837cd471636de18d379caafe29a5#2db100bf8f2e837cd471636de18d379caafe29a5"
+source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=d05827258fac63f0a57693bb51275c9bb483aef4#d05827258fac63f0a57693bb51275c9bb483aef4"
 dependencies = [
  "cc",
  "cfg-if 1.0.0",
@@ -659,7 +659,7 @@ dependencies = [
 [[package]]
 name = "imgui-winit-support"
 version = "0.8.1-alpha.0"
-source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=2db100bf8f2e837cd471636de18d379caafe29a5#2db100bf8f2e837cd471636de18d379caafe29a5"
+source = "git+https://github.com/imgui-rs/imgui-rs.git?rev=d05827258fac63f0a57693bb51275c9bb483aef4#d05827258fac63f0a57693bb51275c9bb483aef4"
 dependencies = [
  "imgui",
  "winit",

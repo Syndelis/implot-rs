@@ -13,10 +13,10 @@ publish = false
 clipboard = "0.5"
 glium = { version = "0.30", default-features = true }
 image = "0.23"
-imgui = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "2db100bf8f2e837cd471636de18d379caafe29a5" }
-imgui-sys = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "2db100bf8f2e837cd471636de18d379caafe29a5" }
-imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "2db100bf8f2e837cd471636de18d379caafe29a5" }
-imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "2db100bf8f2e837cd471636de18d379caafe29a5" }
+imgui = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
+imgui-sys = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
+imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
+imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
 
 implot-sys = { path = "../../implot-sys" }
 implot = { path = "../../" }
