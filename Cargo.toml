@@ -1,6 +1,6 @@
 [package]
 name = "implot"
-version = "0.6.0"
+version = "0.7.0-discord0"
 edition = "2018"
 authors = ["Sandro Merkli", "implot-rs contributors"]
 description = "Rust bindings to https://github.com/epezent/implot"
