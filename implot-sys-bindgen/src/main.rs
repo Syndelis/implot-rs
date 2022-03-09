@@ -17,6 +17,7 @@ fn main() {
         env::var_os("DEP_IMGUI_THIRD_PARTY").expect("DEP_IMGUI_THIRD_PARTY not defined"),
     );
 
+    println!["{:?}", cimgui_include_path.join("cimgui.h")];
     let bindings = Builder::default()
         .header(
             cimgui_include_path
@@ -33,22 +34,37 @@ fn main() {
                 .expect("Could not turn cimplot.h path into string"),
         )
         .parse_callbacks(Box::new(CargoCallbacks))
+        .clang_arg(format!(
+            "-I{}",
+            cimgui_include_path.as_os_str().to_str().unwrap()
+        ))
         .clang_arg("-DCIMGUI_DEFINE_ENUMS_AND_STRUCTS=1")
         // Reuse the imgui types that implot requires from imgui_sys so we don't define
         // our own new types.
-        .raw_line("pub use imgui_sys::{ImVec2, ImVec4, ImGuiCond, ImTextureID};")
-        .raw_line("pub use imgui_sys::{ImGuiContext, ImGuiKeyModFlags, ImDrawList};")
+        .raw_line("pub use imgui_sys::{ImRect, ImVec2, ImVec4, ImGuiCond, ImTextureID};")
+        .raw_line("pub use imgui_sys::{ImGuiContext, ImGuiID, ImGuiKeyModFlags, ImGuiStorage, ImGuiTextBuffer, ImDrawList};")
         .raw_line("pub use imgui_sys::{ImGuiMouseButton, ImGuiDragDropFlags};")
+        .raw_line("pub use imgui_sys::{ImPoolIdx, ImVector_ImGuiColorMod, ImVector_ImGuiStyleMod};")
+        .raw_line("pub use libc::{time_t, tm};")
         .whitelist_recursively(false)
         .whitelist_function("ImPlot.*")
         .whitelist_type("ImPlot.*")
         // We do want to create bindings for the scalar typedefs
         .whitelist_type("Im[U|S][0-9]{1,2}")
+        .whitelist_type("ImAxis.*")
+        .whitelist_type("ImPool_ImPlot.*")
+        .whitelist_type("ImVector_(bool|int|float|double|ImS8|ImU8|ImS16|ImU16|ImS32|ImU32|ImS64|ImU64)")
+        .whitelist_type("ImVector_ImPlot.*")
         // Remove some functions that would take a variable-argument list
         .blacklist_function("ImPlot_AnnotateVVec4")
         .blacklist_function("ImPlot_AnnotateVStr")
         .blacklist_function("ImPlot_AnnotateClampedVVec4")
         .blacklist_function("ImPlot_AnnotateClampedVStr")
+        .blacklist_function("ImPlot_AnnotationV")
+        .blacklist_function("ImPlotAnnotationCollection_AppendV")
+        .blacklist_function("ImPlotTagCollection_AppendV")
+        .blacklist_function("ImPlot_TagXV")
+        .blacklist_function("ImPlot_TagYV")
         .generate()
         .expect("Unable to generate bindings");
 

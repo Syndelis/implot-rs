@@ -21,7 +21,7 @@ use implot_sys as sys;
 // TODO(4bb4) facade-wrap these?
 pub use self::{context::*, plot::*, plot_elements::*};
 use std::os::raw::c_char;
-pub use sys::{ImPlotLimits, ImPlotPoint, ImPlotRange, ImVec2, ImVec4};
+pub use sys::{ImPlotPoint, ImPlotRange, ImPlotRect, ImVec2, ImVec4};
 
 mod context;
 mod plot;
@@ -45,9 +45,21 @@ const NUMBER_OF_Y_AXES: usize = 3;
 #[derive(Clone)]
 #[repr(u32)]
 pub enum YAxisChoice {
-    First = sys::ImPlotYAxis__ImPlotYAxis_1,
-    Second = sys::ImPlotYAxis__ImPlotYAxis_2,
-    Third = sys::ImPlotYAxis__ImPlotYAxis_3,
+    First = sys::ImAxis__ImAxis_Y1,
+    Second = sys::ImAxis__ImAxis_Y2,
+    Third = sys::ImAxis__ImAxis_Y3,
+}
+
+#[rustversion::attr(since(1.48), doc(alias = "ImAxis"))]
+#[derive(Clone)]
+#[repr(u32)]
+pub enum Axis {
+    X1 = sys::ImAxis__ImAxis_X1,
+    X2 = sys::ImAxis__ImAxis_X2,
+    X3 = sys::ImAxis__ImAxis_X3,
+    Y1 = sys::ImAxis__ImAxis_Y1,
+    Y2 = sys::ImAxis__ImAxis_Y2,
+    Y3 = sys::ImAxis__ImAxis_Y3,
 }
 
 /// Turn an Option<YAxisChoice> into an i32. Picks IMPLOT_AUTO for None.
@@ -129,28 +141,10 @@ pub enum PlotColorElement {
     TitleText = sys::ImPlotCol__ImPlotCol_TitleText,
     /// Color of text appearing inside of plots (defaults to ImGuiCol_Text)
     InlayText = sys::ImPlotCol__ImPlotCol_InlayText,
-    /// X-axis label and tick lables color (defaults to ImGuiCol_Text)
-    XAxis = sys::ImPlotCol__ImPlotCol_XAxis,
-    /// X-axis grid color (defaults to 25% ImPlotCol_XAxis)
-    XAxisGrid = sys::ImPlotCol__ImPlotCol_XAxisGrid,
-    /// Y-axis label and tick labels color (defaults to ImGuiCol_Text)
-    YAxis = sys::ImPlotCol__ImPlotCol_YAxis,
-    /// Y-axis grid color (defaults to 25% ImPlotCol_YAxis)
-    YAxisGrid = sys::ImPlotCol__ImPlotCol_YAxisGrid,
-    /// 2nd y-axis label and tick labels color (defaults to ImGuiCol_Text)
-    YAxis2 = sys::ImPlotCol__ImPlotCol_YAxis2,
-    /// 2nd y-axis grid/label color (defaults to 25% ImPlotCol_YAxis2)
-    YAxisGrid2 = sys::ImPlotCol__ImPlotCol_YAxisGrid2,
-    /// 3rd y-axis label and tick labels color (defaults to ImGuiCol_Text)
-    YAxis3 = sys::ImPlotCol__ImPlotCol_YAxis3,
-    /// 3rd y-axis grid/label color (defaults to 25% ImPlotCol_YAxis3)
-    YAxisGrid3 = sys::ImPlotCol__ImPlotCol_YAxisGrid3,
     /// Box-selection color (defaults to yellow)
     Selection = sys::ImPlotCol__ImPlotCol_Selection,
     /// crosshairs color (defaults to ImPlotCol_PlotBorder)
     Crosshairs = sys::ImPlotCol__ImPlotCol_Crosshairs,
-    /// Box-query color (defaults to green)
-    Query = sys::ImPlotCol__ImPlotCol_Query,
 }
 
 /// Colormap choice. Documentation copied from implot.h for convenience.
@@ -158,8 +152,6 @@ pub enum PlotColorElement {
 #[repr(u32)]
 #[derive(Copy, Clone, Debug)]
 pub enum Colormap {
-    /// ImPlot default colormap (n=10). Called "Standard" here because Default is reserved.
-    Standard = sys::ImPlotColormap__ImPlotColormap_Default,
     /// a.k.a. seaborn deep (n=10)
     Deep = sys::ImPlotColormap__ImPlotColormap_Deep,
     /// a.k.a. matplotlib "Set1" (n=9)
@@ -269,34 +261,19 @@ pub enum PlotLocation {
     SouthEast = sys::ImPlotLocation__ImPlotLocation_SouthEast,
 }
 
-#[rustversion::attr(since(1.48), doc(alias = "ImPlotOrientation"))]
-/// Used to orient items on a plot (e.g. legends, labels, etc.)
-#[repr(u32)]
-#[derive(Copy, Clone, Debug)]
-pub enum PlotOrientation {
-    Horizontal = sys::ImPlotOrientation__ImPlotOrientation_Horizontal,
-    Vertical = sys::ImPlotOrientation__ImPlotOrientation_Vertical,
-}
-
 /// Switch to one of the built-in preset colormaps. If samples is greater than 1, the map will be
 /// linearly resampled.
-#[rustversion::attr(since(1.48), doc(alias = "SetColormap"))]
-pub fn set_colormap_from_preset(preset: Colormap, samples: u32) {
+#[rustversion::attr(since(1.48), doc(alias = "PushColorMap"))]
+pub fn push_colormap(preset: Colormap) {
     unsafe {
         // "as" casts saturate as of Rust 1.45. This is safe here, and at least the enum
         // values are not expected to go outside the range of an i32 anyway, so there is no
         // risk of changed values.
-        sys::ImPlot_SetColormapPlotColormap(preset as i32, samples as i32);
+        sys::ImPlot_PushColormap_PlotColormap(preset as i32);
     }
 }
 
-/// Set a custom colormap in the form of a vector of colors.
-#[rustversion::attr(since(1.48), doc(alias = "SetColormap"))]
-pub fn set_colormap_from_vec(colors: Vec<ImVec4>) {
-    unsafe {
-        sys::ImPlot_SetColormapVec4Ptr(colors.as_ptr(), colors.len() as i32);
-    }
-}
+// TODO(eiz): AddColormap
 
 // --- Push/pop utils -------------------------------------------------------------------------
 // Currently not in a struct yet. imgui-rs has some smarts about dealing with stacks, in particular
@@ -319,7 +296,7 @@ pub fn push_style_color(
     alpha: f32,
 ) -> StyleColorToken {
     unsafe {
-        sys::ImPlot_PushStyleColorVec4(
+        sys::ImPlot_PushStyleColor_Vec4(
             *element as sys::ImPlotCol,
             sys::ImVec4 {
                 x: red,
@@ -362,7 +339,7 @@ impl StyleColorToken {
 #[rustversion::attr(since(1.48), doc(alias = "PushStyleVar"))]
 pub fn push_style_var_f32(element: &StyleVar, value: f32) -> StyleVarToken {
     unsafe {
-        sys::ImPlot_PushStyleVarFloat(*element as sys::ImPlotStyleVar, value);
+        sys::ImPlot_PushStyleVar_Float(*element as sys::ImPlotStyleVar, value);
     }
     StyleVarToken { was_popped: false }
 }
@@ -378,7 +355,7 @@ pub fn push_style_var_f32(element: &StyleVar, value: f32) -> StyleVarToken {
 #[rustversion::attr(since(1.48), doc(alias = "PushStyleVar"))]
 pub fn push_style_var_i32(element: &StyleVar, value: i32) -> StyleVarToken {
     unsafe {
-        sys::ImPlot_PushStyleVarInt(*element as sys::ImPlotStyleVar, value);
+        sys::ImPlot_PushStyleVar_Int(*element as sys::ImPlotStyleVar, value);
     }
     StyleVarToken { was_popped: false }
 }
@@ -387,7 +364,7 @@ pub fn push_style_var_i32(element: &StyleVar, value: i32) -> StyleVarToken {
 /// the variable from the stack again.
 pub fn push_style_var_imvec2(element: &StyleVar, value: ImVec2) -> StyleVarToken {
     unsafe {
-        sys::ImPlot_PushStyleVarVec2(*element as sys::ImPlotStyleVar, value);
+        sys::ImPlot_PushStyleVar_Vec2(*element as sys::ImPlotStyleVar, value);
     }
     StyleVarToken { was_popped: false }
 }
@@ -419,11 +396,7 @@ pub fn is_plot_hovered() -> bool {
     unsafe { sys::ImPlot_IsPlotHovered() }
 }
 
-/// Returns true if the current or most recent plot is queried
-#[rustversion::attr(since(1.48), doc(alias = "IsPlotQueried"))]
-pub fn is_plot_queried() -> bool {
-    unsafe { sys::ImPlot_IsPlotQueried() }
-}
+// TODO(eiz): DragRect
 
 /// Returns the mouse position in x,y coordinates of the current or most recent plot,
 /// for the specified choice of Y axis. If `None` is the Y axis choice, that means the
@@ -433,7 +406,11 @@ pub fn get_plot_mouse_position(y_axis_choice: Option<YAxisChoice>) -> ImPlotPoin
     let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
     let mut point = ImPlotPoint { x: 0.0, y: 0.0 }; // doesn't seem to have default()
     unsafe {
-        sys::ImPlot_GetPlotMousePos(&mut point as *mut ImPlotPoint, y_axis_choice_i32);
+        sys::ImPlot_GetPlotMousePos(
+            &mut point as *mut ImPlotPoint,
+            IMPLOT_AUTO, // TODO(eiz): x axis
+            y_axis_choice_i32,
+        );
     }
     point
 }
@@ -448,9 +425,10 @@ pub fn pixels_to_plot_vec2(
     let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
     let mut point = ImPlotPoint { x: 0.0, y: 0.0 }; // doesn't seem to have default()
     unsafe {
-        sys::ImPlot_PixelsToPlotVec2(
+        sys::ImPlot_PixelsToPlot_Vec2(
             &mut point as *mut ImPlotPoint,
             *pixel_position,
+            IMPLOT_AUTO, // TODO(eiz): x axis
             y_axis_choice_i32,
         );
     }
@@ -468,10 +446,11 @@ pub fn pixels_to_plot_f32(
     let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
     let mut point = ImPlotPoint { x: 0.0, y: 0.0 }; // doesn't seem to have default()
     unsafe {
-        sys::ImPlot_PixelsToPlotFloat(
+        sys::ImPlot_PixelsToPlot_Float(
             &mut point as *mut ImPlotPoint,
             pixel_position_x,
             pixel_position_y,
+            IMPLOT_AUTO, // TODO(eiz): x axis
             y_axis_choice_i32,
         );
     }
@@ -489,9 +468,10 @@ pub fn plot_to_pixels_vec2(
     let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
     let mut pixel_position = ImVec2 { x: 0.0, y: 0.0 }; // doesn't seem to have default()
     unsafe {
-        sys::ImPlot_PlotToPixelsPlotPoInt(
+        sys::ImPlot_PlotToPixels_PlotPoInt(
             &mut pixel_position as *mut ImVec2,
             *plot_position,
+            IMPLOT_AUTO, // TODO(eiz): x axis
             y_axis_choice_i32,
         );
     }
@@ -509,10 +489,11 @@ pub fn plot_to_pixels_f32(
     let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
     let mut pixel_position = ImVec2 { x: 0.0, y: 0.0 }; // doesn't seem to have default()
     unsafe {
-        sys::ImPlot_PlotToPixelsdouble(
+        sys::ImPlot_PlotToPixels_double(
             &mut pixel_position as *mut ImVec2,
             plot_position_x,
             plot_position_y,
+            IMPLOT_AUTO, // TODO(eiz): x axis
             y_axis_choice_i32,
         );
     }
@@ -522,55 +503,30 @@ pub fn plot_to_pixels_f32(
 /// Returns the current or most recent plot axis range for the specified choice of Y axis. If
 /// `None` is the Y axis choice, that means the most recently selected Y axis is chosen.
 #[rustversion::attr(since(1.48), doc(alias = "GetPlotLimits"))]
-pub fn get_plot_limits(y_axis_choice: Option<YAxisChoice>) -> ImPlotLimits {
+pub fn get_plot_limits(y_axis_choice: Option<YAxisChoice>) -> ImPlotRect {
     let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
-    // ImPlotLimits doesn't seem to have default()
-    let mut limits = ImPlotLimits {
-        X: ImPlotRange { Min: 0.0, Max: 0.0 },
-        Y: ImPlotRange { Min: 0.0, Max: 0.0 },
-    };
     unsafe {
-        sys::ImPlot_GetPlotLimits(&mut limits as *mut ImPlotLimits, y_axis_choice_i32);
+        sys::ImPlot_GetPlotLimits(
+            IMPLOT_AUTO, // TODO(eiz): x axis
+            y_axis_choice_i32,
+        )
     }
-    limits
 }
 
-/// Returns the query limits of the current or most recent plot, for the specified choice of Y
-/// axis. If `None` is the Y axis choice, that means the most recently selected Y axis is chosen.
-#[rustversion::attr(since(1.48), doc(alias = "GetPlotQuery"))]
-pub fn get_plot_query(y_axis_choice: Option<YAxisChoice>) -> ImPlotLimits {
-    let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
-    // ImPlotLimits doesn't seem to have default()
-    let mut limits = ImPlotLimits {
-        X: ImPlotRange { Min: 0.0, Max: 0.0 },
-        Y: ImPlotRange { Min: 0.0, Max: 0.0 },
-    };
-    unsafe {
-        sys::ImPlot_GetPlotQuery(&mut limits as *mut ImPlotLimits, y_axis_choice_i32);
-    }
-    limits
-}
+// TODO(eiz): DragRect
 
-/// Set the Y axis to be used for any upcoming plot elements
+/// Set the axis to be used for any upcoming plot elements
 #[rustversion::attr(since(1.48), doc(alias = "SetPlotYAxis"))]
-pub fn set_plot_y_axis(y_axis_choice: YAxisChoice) {
+pub fn set_axis(axis: Axis) {
     unsafe {
-        sys::ImPlot_SetPlotYAxis(y_axis_choice as i32);
+        sys::ImPlot_SetAxis(axis as i32);
     }
 }
 
 /// Returns true if the XAxis plot area in the current plot is hovered.
-#[rustversion::attr(since(1.48), doc(alias = "IsPlotXAxisHovered"))]
-pub fn is_plot_x_axis_hovered() -> bool {
-    unsafe { sys::ImPlot_IsPlotXAxisHovered() }
-}
-
-/// Returns true if the Y axis area of the given Y axis choice in the current plot is hovered. If
-/// `None` is the Y axis choice, that means the most recently selected Y axis is chosen.
-#[rustversion::attr(since(1.48), doc(alias = "IsPlotYAxisHovered"))]
-pub fn is_plot_y_axis_hovered(y_axis_choice: Option<YAxisChoice>) -> bool {
-    let y_axis_choice_i32 = y_axis_choice_option_to_i32(y_axis_choice);
-    unsafe { sys::ImPlot_IsPlotYAxisHovered(y_axis_choice_i32) }
+#[rustversion::attr(since(1.48), doc(alias = "IsAxisHovered"))]
+pub fn is_axis_hovered(axis: Axis) -> bool {
+    unsafe { sys::ImPlot_IsAxisHovered(axis as i32) }
 }
 
 /// Returns true if the given item in the legend of the current plot is hovered.

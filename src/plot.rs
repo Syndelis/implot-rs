@@ -2,14 +2,14 @@
 //!
 //! This module defines the `Plot` struct, which is used to create a 2D plot that will
 //! contain all other objects that can be created using this library.
-use crate::{Context, PlotLocation, PlotOrientation, PlotUi, YAxisChoice, NUMBER_OF_Y_AXES};
+use crate::{Context, PlotLocation, PlotUi, YAxisChoice, NUMBER_OF_Y_AXES};
 use bitflags::bitflags;
 pub use imgui::Condition;
 use implot_sys as sys;
 use std::ffi::CString;
 use std::os::raw::c_char;
 use std::{cell::RefCell, rc::Rc};
-pub use sys::{ImPlotLimits, ImPlotPoint, ImPlotRange, ImVec2, ImVec4};
+pub use sys::{ImPlotRange, ImPlotRect, ImVec2, ImVec4};
 
 const DEFAULT_PLOT_SIZE_X: f32 = 400.0;
 const DEFAULT_PLOT_SIZE_Y: f32 = 400.0;
@@ -30,20 +30,15 @@ bitflags! {
         /// The user will not be able to box-select with right-mouse
         const NO_BOX_SELECT = sys::ImPlotFlags__ImPlotFlags_NoBoxSelect;
         /// The mouse position, in plot coordinates, will not be displayed
-        const NO_MOUSE_POSITION = sys::ImPlotFlags__ImPlotFlags_NoMousePos;
-        /// Plot items will not be highlighted when their legend entry is hovered
-        const NO_HIGHLIGHT = sys::ImPlotFlags__ImPlotFlags_NoHighlight;
+        const NO_MOUSE_POSITION = sys::ImPlotFlags__ImPlotFlags_NoMouseText;
+        // TODO(eiz): legend flags
         /// A child window region will not be used to capture mouse scroll (can boost performance
         /// for single ImGui window applications)
         const NO_CHILD = sys::ImPlotFlags__ImPlotFlags_NoChild;
         /// Use an aspect ratio of 1:1 for the plot
         const AXIS_EQUAL = sys::ImPlotFlags__ImPlotFlags_Equal;
-        /// Enable a 2nd y axis
-        const Y_AXIS_2 = sys::ImPlotFlags__ImPlotFlags_YAxis2;
-        /// Enable a 3nd y axis
-        const Y_AXIS_3 = sys::ImPlotFlags__ImPlotFlags_YAxis3;
-        /// The user will be able to draw query rects with middle-mouse
-        const QUERY = sys::ImPlotFlags__ImPlotFlags_Query;
+        // TODO(eiz): SetupAxis
+        // TODO(eiz): DragRect
         /// The default mouse cursor will be replaced with a crosshair when hovered
         const CROSSHAIRS = sys::ImPlotFlags__ImPlotFlags_Crosshairs;
         /// Plot data outside the plot area will be culled from rendering
@@ -142,12 +137,13 @@ pub struct Plot {
     y_tick_labels: [Option<Vec<CString>>; NUMBER_OF_Y_AXES],
     /// Whether to also show the default Y ticks when showing custom ticks or not
     show_y_default_ticks: [bool; NUMBER_OF_Y_AXES],
-    /// Configuration for the legend, if specified. The tuple contains location, orientation
-    /// and a boolean (true means legend is outside of plot, false means within). If nothing
-    /// is set, implot's defaults are used. Note also  that if these are set, then implot's
-    /// interactive legend configuration does not work because it is overridden by the settings
-    /// here.
-    legend_configuration: Option<(PlotLocation, PlotOrientation, bool)>,
+    // Configuration for the legend, if specified. The tuple contains location, orientation
+    // and a boolean (true means legend is outside of plot, false means within). If nothing
+    // is set, implot's defaults are used. Note also  that if these are set, then implot's
+    // interactive legend configuration does not work because it is overridden by the settings
+    // here.
+    // TODO(eiz): legend configuration
+    //legend_configuration: Option<(PlotLocation, PlotOrientation, bool)>,
     /// Flags relating to the plot TODO(4bb4) make those into bitflags
     plot_flags: sys::ImPlotFlags,
     /// Flags relating to the X axis of the plot TODO(4bb4) make those into bitflags
@@ -183,7 +179,7 @@ impl Plot {
             y_tick_positions: [POS_NONE; NUMBER_OF_Y_AXES],
             y_tick_labels: [TICK_NONE; NUMBER_OF_Y_AXES],
             show_y_default_ticks: [false; NUMBER_OF_Y_AXES],
-            legend_configuration: None,
+            // TODO(eiz) legend_configuration: None,
             plot_flags: PlotFlags::ANTIALIASED.bits() as sys::ImPlotFlags,
             x_flags: AxisFlags::NONE.bits() as sys::ImPlotAxisFlags,
             y_flags: [AxisFlags::NONE.bits() as sys::ImPlotAxisFlags; NUMBER_OF_Y_AXES],
@@ -424,6 +420,7 @@ impl Plot {
         self
     }
 
+    /* TODO(eiz): legend
     /// Set the legend location, orientation and whether it is to be drawn outside the plot
     #[rustversion::attr(since(1.48), doc(alias = "SetLegendLocation"))]
     #[inline]
@@ -435,7 +432,7 @@ impl Plot {
     ) -> Self {
         self.legend_configuration = Some((*location, *orientation, outside));
         self
-    }
+    }*/
 
     /// Internal helper function to set axis limits in case they are specified.
     fn maybe_set_axis_limits(&self) {
@@ -447,11 +444,12 @@ impl Plot {
         // --- Direct limit-setting ---
         if let Some(AxisLimitSpecification::Single(limits, condition)) = &self.x_limits {
             unsafe {
+                /* TODO(eiz): SetNextAxisLimits
                 sys::ImPlot_SetNextPlotLimitsX(
                     limits.Min,
                     limits.Max,
                     *condition as sys::ImGuiCond,
-                );
+                );*/
             }
         }
 
@@ -461,12 +459,13 @@ impl Plot {
             .for_each(|(k, limit_spec)| {
                 if let Some(AxisLimitSpecification::Single(limits, condition)) = limit_spec {
                     unsafe {
+                        /* TODO(eiz): SetNextAxisLimits
                         sys::ImPlot_SetNextPlotLimitsY(
                             limits.Min,
                             limits.Max,
                             *condition as sys::ImGuiCond,
                             k as i32,
-                        );
+                        );*/
                     }
                 }
             });
@@ -503,6 +502,7 @@ impl Plot {
             // Calling this unconditionally here as calling it with all NULL pointers should not
             // affect anything. In terms of unsafety, the pointers should be OK as long as any plot
             // struct that has an Rc to the same data is alive.
+            /* TODO(eiz): SetNextAxisLinks
             sys::ImPlot_LinkNextPlotLimits(
                 xmin_pointer,
                 xmax_pointer,
@@ -512,7 +512,7 @@ impl Plot {
                 y_limit_pointers[1].1,
                 y_limit_pointers[2].0,
                 y_limit_pointers[2].1,
-            )
+            )*/
         }
     }
 
@@ -534,12 +534,13 @@ impl Plot {
             };
 
             unsafe {
+                /* TODO(eiz): SetupAxisTicks
                 sys::ImPlot_SetNextPlotTicksXdoublePtr(
                     self.x_tick_positions.as_ref().unwrap().as_ptr(),
                     self.x_tick_positions.as_ref().unwrap().len() as i32,
                     labels_pointer,
                     self.show_x_default_ticks,
-                )
+                )*/
             }
         }
 
@@ -563,13 +564,14 @@ impl Plot {
                     };
 
                     unsafe {
+                        /* TODO(eiz): SetupAxisTicks
                         sys::ImPlot_SetNextPlotTicksYdoublePtr(
                             positions.as_ref().unwrap().as_ptr(),
                             positions.as_ref().unwrap().len() as i32,
                             labels_pointer,
                             *show_defaults,
                             k as i32,
-                        )
+                        )*/
                     }
                 }
             });
@@ -592,17 +594,8 @@ impl Plot {
                 x: self.size[0],
                 y: self.size[1],
             };
-            sys::ImPlot_BeginPlot(
-                self.title.as_ptr(),
-                self.x_label.as_ptr(),
-                self.y_label.as_ptr(),
-                size_vec,
-                self.plot_flags,
-                self.x_flags,
-                self.y_flags[0],
-                self.y_flags[1],
-                self.y_flags[2],
-            )
+            // TODO(eiz): SetupAxis
+            sys::ImPlot_BeginPlot(self.title.as_ptr(), size_vec, self.plot_flags)
         };
 
         if should_render {
@@ -611,6 +604,7 @@ impl Plot {
             // it here instead of as a freestanding function. If this is too restrictive (for
             // example, if you want to set the location based on code running _during_ the plotting
             // for some reason), file an issue and we'll move it.
+            /* TODO(eiz): legend configuration
             if let Some(legend_config) = &self.legend_configuration {
                 // We introduce variables with typechecks here to safeguard against accidental
                 // changes in order in the config tuple
@@ -620,7 +614,7 @@ impl Plot {
                 unsafe {
                     sys::ImPlot_SetLegendLocation(location as i32, orientation as i32, outside_plot)
                 }
-            }
+            }*/
 
             Some(PlotToken {
                 context: plot_ui.context,

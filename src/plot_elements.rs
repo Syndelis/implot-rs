@@ -35,7 +35,7 @@ impl PlotLine {
             return;
         }
         unsafe {
-            sys::ImPlot_PlotLinedoublePtrdoublePtr(
+            sys::ImPlot_PlotLine_doublePtrdoublePtr(
                 self.label.as_ptr() as *const c_char,
                 x.as_ptr(),
                 y.as_ptr(),
@@ -73,7 +73,7 @@ impl PlotStairs {
             return;
         }
         unsafe {
-            sys::ImPlot_PlotStairsdoublePtrdoublePtr(
+            sys::ImPlot_PlotStairs_doublePtrdoublePtr(
                 self.label.as_ptr() as *const c_char,
                 x.as_ptr(),
                 y.as_ptr(),
@@ -111,7 +111,7 @@ impl PlotScatter {
             return;
         }
         unsafe {
-            sys::ImPlot_PlotScatterdoublePtrdoublePtr(
+            sys::ImPlot_PlotScatter_doublePtrdoublePtr(
                 self.label.as_ptr() as *const c_char,
                 x.as_ptr(),
                 y.as_ptr(),
@@ -179,7 +179,7 @@ impl PlotBars {
             // plotting function.
             let (plot_function, x, y);
             if self.horizontal_bars {
-                plot_function = sys::ImPlot_PlotBarsHdoublePtrdoublePtr
+                plot_function = sys::ImPlot_PlotBarsH_doublePtrdoublePtr
                     as unsafe extern "C" fn(
                         *const c_char,
                         *const f64,
@@ -192,7 +192,7 @@ impl PlotBars {
                 x = bar_values;
                 y = axis_positions;
             } else {
-                plot_function = sys::ImPlot_PlotBarsdoublePtrdoublePtr
+                plot_function = sys::ImPlot_PlotBars_doublePtrdoublePtr
                     as unsafe extern "C" fn(
                         *const c_char,
                         *const f64,
@@ -364,7 +364,7 @@ impl PlotHeatmap {
         });
 
         unsafe {
-            sys::ImPlot_PlotHeatmapdoublePtr(
+            sys::ImPlot_PlotHeatmap_doublePtr(
                 self.label.as_ptr() as *const c_char,
                 values.as_ptr(),
                 number_of_rows as i32, // Not sure why C++ code uses a signed value here
@@ -421,7 +421,7 @@ impl PlotStems {
             return;
         }
         unsafe {
-            sys::ImPlot_PlotStemsdoublePtrdoublePtr(
+            sys::ImPlot_PlotStems_doublePtrdoublePtr(
                 self.label.as_ptr() as *const c_char,
                 axis_positions.as_ptr(),
                 stem_values.as_ptr(),
