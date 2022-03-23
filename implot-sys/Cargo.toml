@@ -12,7 +12,7 @@ build = "build.rs"
 links = "implot"
 
 [dependencies]
-imgui-sys = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
+imgui-sys = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "fef6509a6e2bae62e1c30a46d3a4eaa0d7a83ddb" }
 
 [build-dependencies]
 cc = "1.0"
