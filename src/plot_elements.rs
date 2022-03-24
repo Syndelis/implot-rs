@@ -45,6 +45,23 @@ impl PlotLine {
             );
         }
     }
+
+    pub fn plot_i64(&self, x: &[i64], y: &[i64]) {
+        // If there is no data to plot, we stop here
+        if x.len().min(y.len()) == 0 {
+            return;
+        }
+        unsafe {
+            sys::ImPlot_PlotLine_S64PtrS64Ptr(
+                self.label.as_ptr() as *const c_char,
+                x.as_ptr(),
+                y.as_ptr(),
+                x.len().min(y.len()) as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
+                0,                           // No offset
+                std::mem::size_of::<i64>() as i32, // Stride, set to one f64 for the standard use case
+            );
+        }
+    }
 }
 
 /// Struct to provide functionality for plotting a line in a plot with stairs style.
