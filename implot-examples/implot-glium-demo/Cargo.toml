@@ -11,12 +11,12 @@ publish = false
 
 [dependencies]
 clipboard = "0.5"
-glium = { version = "0.30", default-features = true }
+glium = { version = "0.32", default-features = true }
 image = "0.23"
-imgui = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "fef6509a6e2bae62e1c30a46d3a4eaa0d7a83ddb" }
-imgui-sys = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "fef6509a6e2bae62e1c30a46d3a4eaa0d7a83ddb" }
-imgui-glium-renderer = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
-imgui-winit-support = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "d05827258fac63f0a57693bb51275c9bb483aef4" }
+imgui = "0.9.0"
+imgui-sys = "0.9.0"
+imgui-glium-renderer = "0.9.0"
+imgui-winit-support = {version="0.9.0"}
 
 implot-sys = { path = "../../implot-sys" }
 implot = { path = "../../" }

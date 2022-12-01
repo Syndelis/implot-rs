@@ -12,7 +12,7 @@ readme = "README.md"
 
 [dependencies]
 implot-sys = { version = "0.6.0", path = "implot-sys" }
-imgui = { git = "https://github.com/imgui-rs/imgui-rs.git", rev = "fef6509a6e2bae62e1c30a46d3a4eaa0d7a83ddb" }
+imgui = "0.9"
 bitflags = "1.0"
 parking_lot = "0.12"
 rustversion = "1.0.4"
