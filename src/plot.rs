@@ -14,11 +14,11 @@ pub use sys::{ImPlotLimits, ImPlotPoint, ImPlotRange, ImVec2, ImVec4};
 const DEFAULT_PLOT_SIZE_X: f32 = 400.0;
 const DEFAULT_PLOT_SIZE_Y: f32 = 400.0;
 
-#[rustversion::attr(since(1.48), doc(alias = "ImPlotFlags"))]
 bitflags! {
     /// Flags for customizing plot behavior and interaction. Documentation copied from implot.h for
     /// convenience. ImPlot itself also has a "CanvasOnly" flag, which can be emulated here with
     /// the combination of `NO_LEGEND`, `NO_MENUS`, `NO_BOX_SELECT` and `NO_MOUSE_POSITION`.
+    #[rustversion::attr(since(1.48), doc(alias = "ImPlotFlags"))]
     #[repr(transparent)]
     pub struct PlotFlags: u32 {
         /// "Default" according to original docs
@@ -51,11 +51,11 @@ bitflags! {
     }
 }
 
-#[rustversion::attr(since(1.48), doc(alias = "ImPlotAxisFlags"))]
 bitflags! {
     /// Axis flags. Documentation copied from implot.h for convenience. ImPlot itself also
     /// has `Lock`, which combines `LOCK_MIN` and `LOCK_MAX`, and `NoDecorations`, which combines
     /// `NO_GRID_LINES`, `NO_TICK_MARKS` and `NO_TICK_LABELS`.
+    #[rustversion::attr(since(1.48), doc(alias = "ImPlotAxisFlags"))]
     #[repr(transparent)]
     pub struct AxisFlags: u32 {
         /// "Default" according to original docs
