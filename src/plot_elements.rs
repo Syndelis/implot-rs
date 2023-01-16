@@ -40,6 +40,7 @@ impl PlotLine {
                 x.as_ptr(),
                 y.as_ptr(),
                 x.len().min(y.len()) as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
+                0,
                 0,                           // No offset
                 std::mem::size_of::<f64>() as i32, // Stride, set to one f64 for the standard use case
             );
@@ -57,6 +58,7 @@ impl PlotLine {
                 x.as_ptr(),
                 y.as_ptr(),
                 x.len().min(y.len()) as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
+                0, // flags
                 0,                           // No offset
                 std::mem::size_of::<i64>() as i32, // Stride, set to one f64 for the standard use case
             );
@@ -95,6 +97,7 @@ impl PlotStairs {
                 x.as_ptr(),
                 y.as_ptr(),
                 x.len().min(y.len()) as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
+                0, //flags
                 0,                           // No offset
                 std::mem::size_of::<f64>() as i32, // Stride, set to one f64 for the standard use case
             );
@@ -133,6 +136,7 @@ impl PlotScatter {
                 x.as_ptr(),
                 y.as_ptr(),
                 x.len().min(y.len()) as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
+                0, // flags
                 0,                           // No offset
                 std::mem::size_of::<f64>() as i32, // Stride, set to one f64 for the standard use case
             );
@@ -195,33 +199,19 @@ impl PlotBars {
             // meanings though, hence the swapping around before they are passed to the
             // plotting function.
             let (plot_function, x, y);
-            if self.horizontal_bars {
-                plot_function = sys::ImPlot_PlotBarsH_doublePtrdoublePtr
-                    as unsafe extern "C" fn(
-                        *const c_char,
-                        *const f64,
-                        *const f64,
-                        i32,
-                        f64,
-                        i32,
-                        i32,
-                    );
-                x = bar_values;
-                y = axis_positions;
-            } else {
-                plot_function = sys::ImPlot_PlotBars_doublePtrdoublePtr
-                    as unsafe extern "C" fn(
-                        *const c_char,
-                        *const f64,
-                        *const f64,
-                        i32,
-                        f64,
-                        i32,
-                        i32,
-                    );
-                x = axis_positions;
-                y = bar_values;
-            };
+            plot_function = sys::ImPlot_PlotBars_doublePtrdoublePtr
+                as unsafe extern "C" fn(
+                    *const c_char,
+                    *const f64,
+                    *const f64,
+                    i32,
+                    f64,
+                    i32,
+                    i32,
+                    i32,
+                );
+            x = axis_positions;
+            y = bar_values;
 
             plot_function(
                 self.label.as_ptr() as *const c_char,
@@ -229,6 +219,7 @@ impl PlotBars {
                 y.as_ptr(),
                 number_of_points as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
                 self.bar_width,
+                0,
                 0,                                 // No offset
                 std::mem::size_of::<f64>() as i32, // Stride, set to one f64 for the standard use case
             );
@@ -285,11 +276,11 @@ impl PlotText {
                 self.label.as_ptr() as *const c_char,
                 x,
                 y,
-                vertical,
                 sys::ImVec2 {
                     x: self.pixel_offset_x,
                     y: self.pixel_offset_y,
                 },
+                0,
             );
         }
     }
@@ -397,6 +388,7 @@ impl PlotHeatmap {
                 },
                 self.drawarea_lower_left,
                 self.drawarea_upper_right,
+                0,
             );
         }
     }
@@ -444,6 +436,7 @@ impl PlotStems {
                 stem_values.as_ptr(),
                 number_of_points as i32, // "as" casts saturate as of Rust 1.45. This is safe here.
                 self.reference_y,
+                0,
                 0,                                 // No offset
                 std::mem::size_of::<f64>() as i32, // Stride, set to one f64 for the standard use case
             );

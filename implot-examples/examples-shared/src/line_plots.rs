@@ -3,11 +3,11 @@
 
 use imgui::{CollapsingHeader, Condition, Ui};
 use implot::{
-    get_plot_limits, get_plot_mouse_position, get_plot_query, is_legend_entry_hovered,
-    is_plot_hovered, is_plot_queried, pixels_to_plot_vec2, plot_to_pixels_vec2, push_style_color,
-    push_style_var_f32, push_style_var_i32, set_colormap_from_preset, set_colormap_from_vec,
-    set_plot_y_axis, AxisFlags, Colormap, ImPlotLimits, ImPlotPoint, ImPlotRange, ImVec2, ImVec4,
-    Marker, Plot, PlotColorElement, PlotFlags, PlotLine, PlotLocation, PlotOrientation, PlotUi,
+    get_plot_limits, get_plot_mouse_position, is_legend_entry_hovered,
+    is_plot_hovered, pixels_to_plot_vec2, plot_to_pixels_vec2, push_style_color,
+    push_style_var_f32, push_style_var_i32,
+    AxisFlags, Colormap, ImPlotPoint, ImPlotRange, ImVec2, ImVec4,
+    Marker, Plot, PlotColorElement, PlotFlags, PlotLine, PlotLocation, PlotUi,
     StyleVar, YAxisChoice,
 };
 
@@ -48,7 +48,6 @@ impl LinePlotDemoState {
             // The size call could also be omitted, though the defaults don't consider window
             // width, which is why we're not doing so here.
             .size([content_width, 300.0])
-            .with_plot_flags(&(PlotFlags::NONE | PlotFlags::Y_AXIS_2))
             .y_limits(
                 ImPlotRange { Min: 0.0, Max: 1.0 },
                 YAxisChoice::First,
@@ -67,8 +66,6 @@ impl LinePlotDemoState {
                 let y_positions = vec![0.1, 0.9];
                 PlotLine::new("legend label").plot(&x_positions, &y_positions);
 
-                // Now we switch to the second axis for the next call
-                set_plot_y_axis(YAxisChoice::Second);
                 let y_positions = vec![3.3, 1.2];
                 PlotLine::new("legend label two").plot(&x_positions, &y_positions);
             });
@@ -148,7 +145,6 @@ impl LinePlotDemoState {
             .with_plot_flags(&plot_flags)
             .with_x_axis_flags(&x_axis_flags)
             .with_y_axis_flags(YAxisChoice::First, &y_axis_flags)
-            .with_legend_location(&PlotLocation::West, &PlotOrientation::Horizontal, true)
             .build(plot_ui, || {
                 PlotLine::new("A line 2").plot(&[2.4, 2.9], &[1.1, 1.9]);
             });
@@ -162,8 +158,6 @@ impl LinePlotDemoState {
         let mut hover_pos_plot: Option<ImPlotPoint> = None;
         let mut hover_pos_pixels: Option<ImVec2> = None;
         let mut hover_pos_from_pixels: Option<ImPlotPoint> = None;
-        let mut plot_limits: Option<ImPlotLimits> = None;
-        let mut query_limits: Option<ImPlotLimits> = None;
         let mut legend1_hovered = false;
         let mut legend2_hovered = false;
 
@@ -176,7 +170,6 @@ impl LinePlotDemoState {
                 YAxisChoice::First,
                 Condition::FirstUseEver,
             )
-            .with_plot_flags(&(PlotFlags::NONE | PlotFlags::QUERY))
             .build(plot_ui, || {
                 if is_plot_hovered() {
                     hover_pos_plot = Some(get_plot_mouse_position(None));
@@ -198,11 +191,6 @@ impl LinePlotDemoState {
                 PlotLine::new("Legend2").plot(&[0.0, 0.0], &[1.0, 1.0]);
                 legend1_hovered = is_legend_entry_hovered("Legend1");
                 legend2_hovered = is_legend_entry_hovered("Legend2");
-
-                if is_plot_queried() {
-                    query_limits = Some(get_plot_query(None));
-                }
-                plot_limits = Some(get_plot_limits(None));
             });
 
         // Print some previously-exfiltrated info. This is because calling
@@ -222,12 +210,6 @@ impl LinePlotDemoState {
                 ui.io().mouse_pos[0],
                 ui.io().mouse_pos[1]
             ));
-        }
-        if let Some(limits) = plot_limits {
-            ui.text(format!("Plot limits are {:#?}", limits));
-        }
-        if let Some(query) = query_limits {
-            ui.text(format!("Query limits are {:#?}", query));
         }
         ui.text(format!(
             "Legend hovering - 1: {}, 2: {}",
@@ -288,12 +270,6 @@ impl LinePlotDemoState {
         ui.text("This header demos how to select colormaps.");
         let content_width = ui.window_content_region_width();
 
-        // Select a colormap from the presets. The presets are listed in the Colormap enum
-        // and usually have something from 9 to 11 colors in them, with the second number
-        // being the option to resample the colormap to a custom number of colors if picked
-        // higher than 1.
-        set_colormap_from_preset(Colormap::Plasma, 1);
-
         Plot::new("Colormap demo plot")
             .size([content_width, 300.0])
             .build(plot_ui, || {
@@ -302,24 +278,6 @@ impl LinePlotDemoState {
                     .map(|x| PlotLine::new(&format!("{:3.3}", x)).plot(&[0.1, 0.9], &[x, x]))
                     .count();
             });
-
-        // One can also specify a colormap as a vector of RGBA colors. ImPlot uses ImVec4 for this,
-        // so we follow suit. Make sure to set the last number (w in ImVec4) to 1.0 to see anything -
-        // it's the alpha channel.
-        set_colormap_from_vec(vec![
-            ImVec4 {
-                x: 0.9,
-                y: 0.9,
-                z: 0.0,
-                w: 1.0,
-            },
-            ImVec4 {
-                x: 0.0,
-                y: 0.9,
-                z: 0.9,
-                w: 1.0,
-            },
-        ]);
 
         Plot::new("Colormap demo plot #2")
             .size([content_width, 300.0])
@@ -330,9 +288,6 @@ impl LinePlotDemoState {
                     .count();
             });
 
-        // Colormaps are not pushed, they are simply set, because they don't stack or anything.
-        // We can reset to the default by just setting the "Standard" preset.
-        set_colormap_from_preset(Colormap::Standard, 0);
     }
 
     pub fn show_conversions_plot(ui: &Ui, plot_ui: &PlotUi) {

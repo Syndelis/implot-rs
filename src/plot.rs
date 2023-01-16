@@ -41,8 +41,6 @@ bitflags! {
         // TODO(eiz): DragRect
         /// The default mouse cursor will be replaced with a crosshair when hovered
         const CROSSHAIRS = sys::ImPlotFlags__ImPlotFlags_Crosshairs;
-        /// Plot data outside the plot area will be culled from rendering
-        const ANTIALIASED = sys::ImPlotFlags__ImPlotFlags_AntiAliased;
     }
 }
 
@@ -61,10 +59,6 @@ bitflags! {
         const NO_TICK_MARKS = sys::ImPlotAxisFlags__ImPlotAxisFlags_NoTickMarks;
         /// Text labels will not be displayed
         const NO_TICK_LABELS = sys::ImPlotAxisFlags__ImPlotAxisFlags_NoTickLabels;
-        /// A logartithmic (base 10) axis scale will be used (mutually exclusive with AxisFlags::TIME)
-        const LOG_SCALE = sys::ImPlotAxisFlags__ImPlotAxisFlags_LogScale;
-        /// Axis will display date/time formatted labels (mutually exclusive with AxisFlags::LOG_SCALE)
-        const TIME = sys::ImPlotAxisFlags__ImPlotAxisFlags_Time;
         /// The axis will be inverted
         const INVERT = sys::ImPlotAxisFlags__ImPlotAxisFlags_Invert;
         /// The axis minimum value will be locked when panning/zooming
@@ -180,7 +174,7 @@ impl Plot {
             y_tick_labels: [TICK_NONE; NUMBER_OF_Y_AXES],
             show_y_default_ticks: [false; NUMBER_OF_Y_AXES],
             // TODO(eiz) legend_configuration: None,
-            plot_flags: PlotFlags::ANTIALIASED.bits() as sys::ImPlotFlags,
+            plot_flags: PlotFlags::NONE.bits() as sys::ImPlotFlags,
             x_flags: AxisFlags::NONE.bits() as sys::ImPlotAxisFlags,
             y_flags: [AxisFlags::NONE.bits() as sys::ImPlotAxisFlags; NUMBER_OF_Y_AXES],
         }

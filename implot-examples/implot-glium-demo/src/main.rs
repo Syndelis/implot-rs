@@ -1,4 +1,4 @@
-use imgui::{Condition, Window};
+use imgui::Condition;
 use implot::Context;
 
 // The actual backend-specific code is in this.
@@ -22,9 +22,9 @@ fn main() {
             demo_state.show_demos(ui, &plot_ui);
         }
 
-        Window::new("Welcome to the ImPlot-rs demo!")
+        ui.window("Welcome to the ImPlot-rs demo!")
             .size([430.0, 450.0], Condition::FirstUseEver)
-            .build(ui, || {
+            .build(|| {
                 ui.checkbox("Show C++ ImPlot demo window", &mut showing_demo);
                 ui.checkbox("Show Rust ImPlot demo windows", &mut showing_rust_demo);
                 // TODO(4bb4) ... move windows by default so this is less confusing

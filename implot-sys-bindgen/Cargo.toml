@@ -6,4 +6,5 @@ edition = "2018"
 
 [dependencies]
 bindgen = "0.57"
-imgui-sys = { version = "0.9.0-discord0", path = "../../imgui-rs/imgui-sys" }
+imgui-sys = {version = "0.10.0", features=["docking"]}
+

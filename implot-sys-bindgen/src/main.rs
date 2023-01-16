@@ -17,7 +17,7 @@ fn main() {
         env::var_os("DEP_IMGUI_THIRD_PARTY").expect("DEP_IMGUI_THIRD_PARTY not defined"),
     );
 
-    println!["{:?}", cimgui_include_path.join("cimgui.h")];
+    dbg!(cimgui_include_path.join("cimgui.h"));
     let bindings = Builder::default()
         .header(
             cimgui_include_path
@@ -42,7 +42,7 @@ fn main() {
         // Reuse the imgui types that implot requires from imgui_sys so we don't define
         // our own new types.
         .raw_line("pub use imgui_sys::{ImRect, ImVec2, ImVec4, ImGuiCond, ImTextureID};")
-        .raw_line("pub use imgui_sys::{ImGuiContext, ImGuiID, ImGuiKeyModFlags, ImGuiStorage, ImGuiTextBuffer, ImDrawList};")
+        .raw_line("pub use imgui_sys::{ImGuiContext, ImGuiID, ImGuiStorage, ImGuiTextBuffer, ImDrawList};")
         .raw_line("pub use imgui_sys::{ImGuiMouseButton, ImGuiDragDropFlags};")
         .raw_line("pub use imgui_sys::{ImPoolIdx, ImVector_ImGuiColorMod, ImVector_ImGuiStyleMod};")
         .raw_line("pub use libc::{time_t, tm};")
