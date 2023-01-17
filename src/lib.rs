@@ -33,7 +33,7 @@ const IMPLOT_AUTO: i32 = -1;
 
 // Number of Y axes, this is used in a bunch of places for storing things like settings.
 // If this changes, also change the YAxisChoice enum.
-const NUMBER_OF_Y_AXES: usize = 3;
+const NUMBER_OF_Y_AXES: usize = 4;
 
 /// Choice of Y axis. This an enum instead of just an integer so as to make it impossible
 /// to select a Y axis that is not present - this makes it easier to avoid `Result`-type
