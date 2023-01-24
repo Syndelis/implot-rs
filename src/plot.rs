@@ -68,6 +68,22 @@ bitflags! {
     }
 }
 
+///
+#[rustversion::attr(since(1.48), doc(alias = "ImPlotScale_"))]
+#[repr(u32)]
+#[derive(Copy, Clone)]
+pub enum PlotScale {
+    /// Default linear scale
+    LINEAR = sys::ImPlotScale__ImPlotScale_Linear,
+    /// Date/time scale
+    TIME = sys::ImPlotScale__ImPlotScale_Time,
+    /// base 10 logarithmic scale
+    LOG_10 = sys::ImPlotScale__ImPlotScale_Log10,
+    /// Symmetric log scale. A log scale with a linear region
+    /// roughly between -1 and 1
+    SYM_LOG = sys::ImPlotScale__ImPlotScale_SymLog,
+}
+
 /// Internally-used struct for storing axis limits
 #[derive(Clone)]
 enum AxisLimitSpecification {
@@ -118,6 +134,12 @@ pub struct Plot {
     /// convert to null-terminated data anyway, we may as well do that directly instead of cloning
     /// Strings and converting them afterwards.
     x_tick_labels: Option<Vec<CString>>,
+
+    /// Scale used for X axis
+    x_axis_scale: Option<PlotScale>,
+    /// Scale used for Y axis
+    y_axis_scale: [Option<PlotScale>; NUMBER_OF_Y_AXES],
+
     /// Whether to also show the default X ticks when showing custom ticks or not
     show_x_default_ticks: bool,
     /// Positions for custom Y axis ticks, if any
@@ -163,6 +185,8 @@ impl Plot {
             title: CString::new(title)
                 .unwrap_or_else(|_| panic!("String contains internal null bytes: {}", title)),
             size: [DEFAULT_PLOT_SIZE_X, DEFAULT_PLOT_SIZE_Y],
+            x_axis_scale: None,
+            y_axis_scale: [None; NUMBER_OF_Y_AXES],
             x_label: CString::new("").unwrap(),
             y_label: CString::new("").unwrap(),
             x_limits: None,
@@ -310,6 +334,21 @@ impl Plot {
     #[inline]
     pub fn linked_y3_limits(self, limits: Rc<RefCell<ImPlotRange>>) -> Self {
         self.linked_y_limits(limits, YAxisChoice::Third)
+    }
+
+    /// Set scale for X axis
+    #[inline]
+    pub fn x_axis_scale(mut self, scale: PlotScale) -> Self {
+        self.x_axis_scale = Some(scale);
+        self
+    }
+
+    /// Set scale for specified Y axis
+    #[inline]
+    pub fn y_axis_scale(mut self, y_axis_choice: YAxisChoice, scale: PlotScale) -> Self {
+        let axis_index = y_axis_choice as usize;
+        self.y_axis_scale[axis_index] = Some(scale);
+        self
     }
 
     /// Set X ticks without labels for the plot. The vector contains one label each in
@@ -571,6 +610,22 @@ impl Plot {
             });
     }
 
+    fn maybe_set_axis_scales(&self) {
+        if let Some(s) = self.x_axis_scale {
+            unsafe {
+                sys::ImPlot_SetupAxisScale_PlotScale(crate::Axis::X1 as i32, s as i32);
+            }
+        }
+
+        for (axis, value) in self.y_axis_scale.iter().enumerate() {
+            if let Some(s) = value {
+                unsafe {
+                    sys::ImPlot_SetupAxisScale_PlotScale(axis as i32, *s as i32);
+                }
+            }
+        }
+    }
+
     /// Attempt to show the plot. If this returns a token, the plot will actually
     /// be drawn. In this case, use the drawing functionality to draw things on the
     /// plot, and then call `end()` on the token when done with the plot.
@@ -591,6 +646,8 @@ impl Plot {
             // TODO(eiz): SetupAxis
             sys::ImPlot_BeginPlot(self.title.as_ptr(), size_vec, self.plot_flags)
         };
+
+        self.maybe_set_axis_scales();
 
         if should_render {
             // Configure legend location, if one was set. This has to be called between begin() and
