@@ -6,5 +6,5 @@ edition = "2018"
 
 [dependencies]
 bindgen = "0.57"
-imgui-sys = {version = "0.10.0", features=["docking"]}
+imgui-sys = { git = "https://github.com/syndelis/imgui-rs", branch = "fix/alpha-blending", features = ["docking"] }
 

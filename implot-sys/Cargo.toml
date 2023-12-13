@@ -12,7 +12,7 @@ build = "build.rs"
 links = "implot"
 
 [dependencies]
-imgui-sys = {version = "0.10.0", features=["docking"]}
+imgui-sys = { git = "https://github.com/syndelis/imgui-rs", branch = "fix/alpha-blending", features = ["docking"] }
 libc = "0.2"
 
 [build-dependencies]
