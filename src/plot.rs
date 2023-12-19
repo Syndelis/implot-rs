@@ -644,7 +644,19 @@ impl Plot {
                 y: self.size[1],
             };
             // TODO(eiz): SetupAxis
-            sys::ImPlot_BeginPlot(self.title.as_ptr(), size_vec, self.plot_flags)
+            let plot_should_render =
+                sys::ImPlot_BeginPlot(self.title.as_ptr(), size_vec, self.plot_flags);
+
+            if !self.x_label.is_empty() || !self.y_label.is_empty() {
+                sys::ImPlot_SetupAxes(
+                    self.x_label.as_ptr(),
+                    self.y_label.as_ptr(),
+                    self.x_flags,
+                    self.y_flags[0],
+                );
+            }
+
+            plot_should_render
         };
 
         self.maybe_set_axis_scales();
